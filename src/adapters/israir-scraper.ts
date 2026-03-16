@@ -234,9 +234,13 @@ export class IsrairScraperAdapter implements AirlineAdapter {
       // Skip flights with no available seats — API returns seats:0 for sold-out flights
       if (seats === 0) return null;
 
-      // Check return leg seats too — subject=ALL returns round-trip packages.
-      // If the return leg has 0 seats, the package isn't bookable.
-      const returnLeg = pkg.legGroups?.[1]?.legList?.[0]?.legOptionList?.[0];
+      // Check return leg seats — round-trip packages store both legs in
+      // legGroups[0].legList[0] (outbound) and legGroups[0].legList[1] (return).
+      const returnLeg = pkg.legGroups?.[0]?.legList?.[1]?.legOptionList?.[0]
+                      || pkg.legGroups?.[1]?.legList?.[0]?.legOptionList?.[0]; // fallback
+      let returnDate = '';
+      const totalPax = query.passengers.adults + query.passengers.children + query.passengers.infants;
+
       if (returnLeg) {
         const returnSegment = returnLeg.legSegmentList?.[0];
         if (returnSegment) {
@@ -245,28 +249,35 @@ export class IsrairScraperAdapter implements AirlineAdapter {
             log.debug({ destination: query.destination, date: departureDate }, 'Skipping: return leg has 0 seats');
             return null;
           }
+          // Extract return date
+          const retDateTime = returnSegment.depLoc?.scheduledDateTime;
+          if (retDateTime) {
+            const [retDatePart] = retDateTime.split(' ');
+            const [rdd, rmm, ryyyy] = retDatePart.split('/');
+            returnDate = `${ryyyy}-${rmm}-${rdd}`;
+          }
         }
       }
 
-      // Extract return date for display (round-trip packages)
-      let returnDate = '';
-      if (returnLeg) {
-        const retSegment = returnLeg.legSegmentList?.[0];
-        const retDateTime = retSegment?.depLoc?.scheduledDateTime;
-        if (retDateTime) {
-          const [retDatePart] = retDateTime.split(' ');
-          const [rdd, rmm, ryyyy] = retDatePart.split('/');
-          returnDate = `${ryyyy}-${rmm}-${rdd}`;
-        }
+      // Skip if not enough seats for the full passenger mix on outbound
+      if (seats < totalPax) {
+        log.debug({ destination: query.destination, date: departureDate, seats, needed: totalPax }, 'Skipping: not enough seats for passenger mix');
+        return null;
       }
 
       const flightNumber = `6H${segment.flightNumber || ''}`;
       const destCode = pkg.destCode || segment.arrLoc?.location || query.destination;
 
-      // Build booking URL from deepLinkURL or construct one
-      const bookingUrl = pkg.deepLinkURL
-        ? `https://www.israir.co.il${pkg.deepLinkURL}`
-        : `https://www.israir.co.il/he-IL/reservation/search/flights-abroad/results?origin=${query.origin}&destination=${destCode}&adults=${adults}&children=${children}&infants=${infants}&subject=ALL`;
+      // Build booking URL — fix the deepLinkURL passenger count (defaults to 1 adult)
+      let bookingUrl: string;
+      if (pkg.deepLinkURL) {
+        const fixedLink = pkg.deepLinkURL
+          .replace(/adultsNum=\d+/, `adultsNum=${adults}`)
+          .replace(/childrenNum=\d+/, `childrenNum=${children}`);
+        bookingUrl = `https://www.israir.co.il${fixedLink}`;
+      } else {
+        bookingUrl = `https://www.israir.co.il/he-IL/reservation/search/flights-abroad/results?origin=${query.origin}&destination=${destCode}&adults=${adults}&children=${children}&infants=${infants}&subject=ALL`;
+      }
 
       return {
         id: `ISR-${flightNumber}-${departureDate}-${departureTime}-${pricePerPerson}`,
