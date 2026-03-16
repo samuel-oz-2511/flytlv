@@ -234,30 +234,15 @@ export class IsrairScraperAdapter implements AirlineAdapter {
       // Skip flights with no available seats — API returns seats:0 for sold-out flights
       if (seats === 0) return null;
 
-      // Check return leg seats — round-trip packages store both legs in
-      // legGroups[0].legList[0] (outbound) and legGroups[0].legList[1] (return).
+      // Skip round-trip packages — we only want one-way flights
       const returnLeg = pkg.legGroups?.[0]?.legList?.[1]?.legOptionList?.[0]
-                      || pkg.legGroups?.[1]?.legList?.[0]?.legOptionList?.[0]; // fallback
-      let returnDate = '';
-      const totalPax = query.passengers.adults + query.passengers.children + query.passengers.infants;
-
+                      || pkg.legGroups?.[1]?.legList?.[0]?.legOptionList?.[0];
       if (returnLeg) {
-        const returnSegment = returnLeg.legSegmentList?.[0];
-        if (returnSegment) {
-          const returnSeats = parseInt(returnSegment.seats, 10) || 0;
-          if (returnSeats === 0) {
-            log.debug({ destination: query.destination, date: departureDate }, 'Skipping: return leg has 0 seats');
-            return null;
-          }
-          // Extract return date
-          const retDateTime = returnSegment.depLoc?.scheduledDateTime;
-          if (retDateTime) {
-            const [retDatePart] = retDateTime.split(' ');
-            const [rdd, rmm, ryyyy] = retDatePart.split('/');
-            returnDate = `${ryyyy}-${rmm}-${rdd}`;
-          }
-        }
+        log.debug({ destination: query.destination, date: departureDate }, 'Skipping: round-trip package (one-way only)');
+        return null;
       }
+
+      const totalPax = query.passengers.adults + query.passengers.children + query.passengers.infants;
 
       // Skip if not enough seats for the full passenger mix on outbound
       if (seats < totalPax) {
@@ -298,7 +283,7 @@ export class IsrairScraperAdapter implements AirlineAdapter {
         bookingUrl,
         offerIdOrRef: pkg.packageUUID || null,
         rulesSummary: [
-          returnDate ? `Round-trip (return ${returnDate})` : '',
+          'One-way',
           seats > 0 ? `${seats} seats` : '',
           segment.baggageIndicator === 'NOT_INCLUDED_IN_PRICE' ? 'baggage not included' : '',
         ].filter(Boolean).join(', '),

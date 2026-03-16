@@ -76,6 +76,7 @@ async function main() {
   const shutdown = async () => {
     logger.info('Shutting down...');
     scheduler.stop();
+    cooldown.close();
     offerStore.close();
     await closeBrowser();
     process.exit(0);
