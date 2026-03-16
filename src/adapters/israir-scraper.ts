@@ -234,6 +234,32 @@ export class IsrairScraperAdapter implements AirlineAdapter {
       // Skip flights with no available seats — API returns seats:0 for sold-out flights
       if (seats === 0) return null;
 
+      // Check return leg seats too — subject=ALL returns round-trip packages.
+      // If the return leg has 0 seats, the package isn't bookable.
+      const returnLeg = pkg.legGroups?.[1]?.legList?.[0]?.legOptionList?.[0];
+      if (returnLeg) {
+        const returnSegment = returnLeg.legSegmentList?.[0];
+        if (returnSegment) {
+          const returnSeats = parseInt(returnSegment.seats, 10) || 0;
+          if (returnSeats === 0) {
+            log.debug({ destination: query.destination, date: departureDate }, 'Skipping: return leg has 0 seats');
+            return null;
+          }
+        }
+      }
+
+      // Extract return date for display (round-trip packages)
+      let returnDate = '';
+      if (returnLeg) {
+        const retSegment = returnLeg.legSegmentList?.[0];
+        const retDateTime = retSegment?.depLoc?.scheduledDateTime;
+        if (retDateTime) {
+          const [retDatePart] = retDateTime.split(' ');
+          const [rdd, rmm, ryyyy] = retDatePart.split('/');
+          returnDate = `${ryyyy}-${rmm}-${rdd}`;
+        }
+      }
+
       const flightNumber = `6H${segment.flightNumber || ''}`;
       const destCode = pkg.destCode || segment.arrLoc?.location || query.destination;
 
@@ -261,6 +287,7 @@ export class IsrairScraperAdapter implements AirlineAdapter {
         bookingUrl,
         offerIdOrRef: pkg.packageUUID || null,
         rulesSummary: [
+          returnDate ? `Round-trip (return ${returnDate})` : '',
           seats > 0 ? `${seats} seats` : '',
           segment.baggageIndicator === 'NOT_INCLUDED_IN_PRICE' ? 'baggage not included' : '',
         ].filter(Boolean).join(', '),
