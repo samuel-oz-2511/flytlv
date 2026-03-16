@@ -343,7 +343,8 @@ function renderCard(o){
   }else{
     // Priced flight
     h+='<div class="price-main"><span class="price-currency">'+curSym(o.currency)+'</span><span class="price-amount">'+fmtNum(o.total_price)+'</span></div>';
-    h+='<div class="price-meta"><span class="price-label">Total \u00b7 2A+1C</span><span class="price-breakdown">'+curSym(o.currency)+fmtNum(o.price_per_adult)+'/adult \u00b7 '+curSym(o.currency)+fmtNum(o.price_per_child)+'/child</span></div>';
+    const isRT=o.conditions&&o.conditions.includes('Round-trip');
+    h+='<div class="price-meta"><span class="price-label">'+(isRT?'Round-trip':'One-way')+' \u00b7 2A+1C</span><span class="price-breakdown">'+curSym(o.currency)+fmtNum(o.price_per_adult)+'/adult \u00b7 '+curSym(o.currency)+fmtNum(o.price_per_child)+'/child</span></div>';
     if(sn!==null){
       const urgency=sn<=3?'urgent':sn<=10?'warning':'ok';
       const icon=sn<=3?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>':'';
