@@ -42,14 +42,18 @@ async function main() {
   // Initialize pipeline components
   const cooldown = new CooldownStore(config.dedup.cooldownMinutes);
   const slack = new SlackNotifier(config.slack);
-  const offerStore = new OfferStore();
+  const dbPath = process.env.DATA_DIR
+    ? `${process.env.DATA_DIR}/offers.db`
+    : undefined; // defaults to ./data/offers.db
+  const offerStore = new OfferStore(dbPath);
   const executor = new PollExecutor(cooldown, slack);
   executor.setOfferStore(offerStore);
   const scheduler = new Scheduler(config, searchesConfig, adapters, executor, cooldown);
 
   // Start dashboard web server
-  startWebServer(offerStore, 3737);
-  logger.info('Dashboard available at http://localhost:3737');
+  const port = parseInt(process.env.PORT || '3737', 10);
+  startWebServer(offerStore, port);
+  logger.info({ port }, 'Dashboard available');
 
   if (!slack.isEnabled()) {
     logger.warn('Slack not configured — alerts will be logged only');
