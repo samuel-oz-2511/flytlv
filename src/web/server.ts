@@ -251,7 +251,7 @@ a{text-decoration:none}
 <div class="hero">
   <div class="hero-inner">
     <h1>Last-Minute Flights from Israel</h1>
-    <p>Real-time seat availability and pricing across Israeli carriers. Updated every 5 minutes.</p>
+    <p>Real-time seat availability and pricing across Israeli carriers. Updated every 10 minutes.</p>
     <div class="hero-stats">
       <div class="hero-stat">
         <span class="hero-stat-val" id="statFlights">-</span>
@@ -355,7 +355,7 @@ function renderCard(o){
 
   // Footer
   h+='<div class="card-foot">';
-  h+='<span class="card-meta">'+(gone?'Disappeared '+ago(o.gone_at):'Seen '+ago(o.last_seen))+(o.conditions?' \u00b7 '+o.conditions:'')+'</span>';
+  h+='<span class="card-meta">'+(gone?'Disappeared '+ago(o.gone_at):'<span style="color:var(--green);font-weight:600">\u2713 Verified '+ago(o.last_seen)+'</span>')+(o.conditions?' \u00b7 '+o.conditions:'')+'</span>';
   if(!gone && o.booking_url){
     h+='<a class="book-btn" href="'+o.booking_url+'" target="_blank" rel="noopener">Book Now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>';
   }
@@ -376,7 +376,7 @@ function renderDateGroup(date,items){
 function render(list){
   const el=document.getElementById('main');
   if(!list.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>No flights match your filters</h3><p>Try widening your search or check back soon. We scan every 5 minutes.</p></div>';
+    el.innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>No flights match your filters</h3><p>Try widening your search or check back soon. We scan every 10 minutes.</p></div>';
     return;
   }
 
@@ -388,7 +388,7 @@ function render(list){
   if(statusFilter!=='gone'){
     h+='<div class="section-header"><div class="section-icon green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h2>Available Now</h2><span class="count green">'+avail.length+'</span></div>';
     if(avail.length===0){
-      h+='<div class="empty-state" style="padding:48px 20px"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg></div><h3>No available flights right now</h3><p>We check every 5 minutes. New flights will appear here automatically.</p></div>';
+      h+='<div class="empty-state" style="padding:48px 20px"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg></div><h3>No available flights right now</h3><p>We check every 10 minutes. New flights will appear here automatically.</p></div>';
     }else{
       const byDate={};avail.forEach(o=>{(byDate[o.departure_date]=byDate[o.departure_date]||[]).push(o)});
       for(const[date,items]of Object.entries(byDate)) h+=renderDateGroup(date,items);

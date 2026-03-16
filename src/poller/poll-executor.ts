@@ -111,7 +111,7 @@ export class PollExecutor {
     if (this.offerStore && allValidOffers.length > 0) {
       try {
         this.offerStore.recordOffers(allValidOffers, offerFingerprint);
-        this.offerStore.markGone(adapter.name, 15);
+        this.offerStore.markGone(adapter.name, 12);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         log.error({ error: msg }, 'Failed to record offers to store');

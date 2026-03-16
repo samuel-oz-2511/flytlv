@@ -1,6 +1,7 @@
 searches:
-  # Rolling 5-day window from "now" — date_range is ignored,
-  # rolling_days controls the lookahead window dynamically.
+  # Rolling 5-day window from "now" — checks flights departing in the
+  # next 5 days only. Adapters that cache all dates per-destination
+  # will naturally return only matching dates.
 
   - name: "Israel to Greece & Cyprus (priority)"
     origins: [TLV]
