@@ -14,12 +14,13 @@ const log = childLogger('israir');
  * that response to get full flight package data with pricing.
  *
  * Key discoveries:
- * - subject=ALL returns FLIGHT_PACKAGE data (round-trip packages with outbound legs)
+ * - oneWay=true returns one-way flight packages (legs=1, no return leg)
+ * - subject=ALL without oneWay returns round-trip FLIGHT_PACKAGE data
  * - searchRange=[] returns all available dates
- * - API returns paginated results (80 per page, up to 173 total)
+ * - API returns paginated results (80+ per page, up to 200+ total)
  * - Each package has: flight segments, seats, pricing (USD per person), deepLinkURL
  * - Manual fetch() calls return 405/500 — must navigate via SPA
- * - One page load per destination required
+ * - One page load per destination required (or empty dest for all)
  */
 export class IsrairScraperAdapter implements AirlineAdapter {
   readonly source = AirlineSource.ISRAIR;
@@ -139,8 +140,8 @@ export class IsrairScraperAdapter implements AirlineAdapter {
       });
 
       // Navigate to search results page with params
-      // subject=ALL returns flight packages; searchRange=[] returns all dates
-      const searchUrl = `https://www.israir.co.il/he-IL/reservation/search/flights-abroad/results?origin=${query.origin}&destination=${query.destination}&searchRange=[]&adults=${query.passengers.adults}&children=${query.passengers.children}&infants=${query.passengers.infants}&subject=ALL&searchTime=${new Date().toISOString()}`;
+      // oneWay=true returns one-way flight packages; searchRange=[] returns all dates
+      const searchUrl = `https://www.israir.co.il/he-IL/reservation/search/flights-abroad/results?origin=${query.origin}&destination=${query.destination}&searchRange=[]&adults=${query.passengers.adults}&children=${query.passengers.children}&infants=${query.passengers.infants}&oneWay=true&searchTime=${new Date().toISOString()}`;
 
       await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});
       await page.waitForTimeout(3000);
@@ -234,14 +235,6 @@ export class IsrairScraperAdapter implements AirlineAdapter {
       // Skip flights with no available seats — API returns seats:0 for sold-out flights
       if (seats === 0) return null;
 
-      // Skip round-trip packages — we only want one-way flights
-      const returnLeg = pkg.legGroups?.[0]?.legList?.[1]?.legOptionList?.[0]
-                      || pkg.legGroups?.[1]?.legList?.[0]?.legOptionList?.[0];
-      if (returnLeg) {
-        log.debug({ destination: query.destination, date: departureDate }, 'Skipping: round-trip package (one-way only)');
-        return null;
-      }
-
       const totalPax = query.passengers.adults + query.passengers.children + query.passengers.infants;
 
       // Skip if not enough seats for the full passenger mix on outbound
@@ -261,7 +254,7 @@ export class IsrairScraperAdapter implements AirlineAdapter {
           .replace(/childrenNum=\d+/, `childrenNum=${children}`);
         bookingUrl = `https://www.israir.co.il${fixedLink}`;
       } else {
-        bookingUrl = `https://www.israir.co.il/he-IL/reservation/search/flights-abroad/results?origin=${query.origin}&destination=${destCode}&adults=${adults}&children=${children}&infants=${infants}&subject=ALL`;
+        bookingUrl = `https://www.israir.co.il/he-IL/reservation/search/flights-abroad/results?origin=${query.origin}&destination=${destCode}&adults=${adults}&children=${children}&infants=${infants}&oneWay=true`;
       }
 
       return {
