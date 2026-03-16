@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+*.log
+logs/
+data/
+screenshots/
+.elal-profile*/
+src/test-*

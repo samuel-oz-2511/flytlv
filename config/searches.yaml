@@ -1,0 +1,27 @@
+searches:
+  # Rolling 5-day window from "now" — date_range is ignored,
+  # rolling_days controls the lookahead window dynamically.
+
+  - name: "Israel to Greece & Cyprus (priority)"
+    origins: [TLV]
+    destinations: [ATH, SKG, RHO, HER, CFU, JMK, JTR, LCA, PFO, ECN]
+    rolling_days: 5
+    passengers:
+      adults: 2
+      children: 1
+
+  - name: "Israel to Western Europe"
+    origins: [TLV]
+    destinations: [BCN, FCO, CDG, LHR, AMS, BER, VIE, PRG, ZRH, MXP, LIS]
+    rolling_days: 5
+    passengers:
+      adults: 2
+      children: 1
+
+  - name: "Israel to Eastern Europe"
+    origins: [TLV]
+    destinations: [SOF, BUD, WAW, OTP, BEG]
+    rolling_days: 5
+    passengers:
+      adults: 2
+      children: 1
