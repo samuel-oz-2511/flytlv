@@ -68,13 +68,16 @@ export class SlackNotifier {
         ? `Offer ID: \`${offer.offerIdOrRef}\``
         : 'No direct link';
 
+    const isRoundTrip = offer.rulesSummary?.includes('Round-trip') ?? false;
+    const priceLabel = isRoundTrip ? 'Round-trip Price' : 'One-way Price';
+
     const priceFields = isSeatsOnly
       ? [
           { type: 'mrkdwn', text: `*Seats Available:*\n🟢 ${offer.seatsAvailable}` },
           { type: 'mrkdwn', text: `*Info:*\nSeat availability only — check elal.com for pricing` },
         ]
       : [
-          { type: 'mrkdwn', text: `*Total Price:*\n${offer.currency} ${offer.totalPrice.toFixed(2)}` },
+          { type: 'mrkdwn', text: `*${priceLabel}:*\n${offer.currency} ${offer.totalPrice.toFixed(2)}` },
           { type: 'mrkdwn', text: `*Breakdown:*\n${priceBreakdown}` },
         ];
 
