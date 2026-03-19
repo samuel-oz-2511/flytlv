@@ -85,10 +85,7 @@ button{font-family:inherit;cursor:pointer}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .update-text{font-size:11px;color:var(--text3);font-weight:500}
 
-/* Auth in Nav */
-.auth-nav{display:flex;align-items:center;gap:8px}
-.auth-avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-light);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1.5px solid var(--blue-50)}
-.auth-email{font-size:12px;font-weight:600;color:var(--text2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Nav utilities */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:600;padding:7px 14px;border-radius:var(--radius-xs);border:none;transition:var(--transition);white-space:nowrap}
 .btn-primary{background:var(--blue);color:#fff;box-shadow:0 1px 2px rgba(59,130,246,.3)}
 .btn-primary:hover{background:var(--blue-hover);box-shadow:0 2px 8px rgba(59,130,246,.35);transform:translateY(-1px)}
@@ -99,13 +96,7 @@ button{font-family:inherit;cursor:pointer}
 .btn svg{width:14px;height:14px}
 .btn-sm{font-size:12px;padding:5px 10px}
 
-/* ============ ANON BANNER ============ */
-.anon-banner{background:linear-gradient(135deg,var(--blue-light) 0%,#ede9fe 100%);border-bottom:1px solid var(--blue-50);padding:12px max(20px,calc((100vw - 1180px)/2));display:flex;align-items:center;gap:12px}
-.anon-banner-icon{width:32px;height:32px;border-radius:8px;background:var(--white);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--shadow-xs)}
-.anon-banner-icon svg{width:16px;height:16px;color:var(--blue)}
-.anon-banner-text{font-size:13px;color:var(--text2);font-weight:500}
-.anon-banner-text strong{color:var(--text);font-weight:700}
-.anon-banner .btn{margin-left:auto;flex-shrink:0}
+/* ============ (banner removed) ============ */
 
 /* ============ HERO ============ */
 .hero{background:var(--text);padding:32px max(20px,calc((100vw - 1180px)/2)) 36px;color:#fff;position:relative;overflow:hidden}
@@ -291,45 +282,99 @@ button{font-family:inherit;cursor:pointer}
 .about-box li{font-size:13px;color:var(--text2);line-height:1.7;padding-left:20px;position:relative;margin-bottom:4px}
 .about-box li::before{content:'';position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--blue-light);border:2px solid var(--blue)}
 
-@media(max-width:768px){
-  .features{grid-template-columns:1fr;max-width:400px}
-  .landing-hero h1{font-size:24px}
-  .landing-hero .landing-sub{font-size:14px}
-  .landing-hero{padding:40px 16px 32px}
-  .about,.features{padding-left:16px;padding-right:16px}
-}
-
 /* ============ FOOTER ============ */
 .page-foot{text-align:center;padding:24px 20px;font-size:11px;color:var(--text3);font-weight:500}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:768px){
-  .hero{padding:24px 16px 28px}
-  .hero-left h1{font-size:20px}
-  .hero-inner{flex-direction:column;align-items:flex-start;gap:20px}
-  .stats-row{width:100%}
-  .stat-card{flex:1;min-width:0;padding:10px 14px}
-  .stat-val{font-size:22px}
-  .nav,.toolbar,.main{padding-left:14px;padding-right:14px}
-  .anon-banner{padding-left:14px;padding-right:14px;flex-wrap:wrap;gap:8px}
-  .anon-banner .btn{margin-left:0;width:100%}
+  /* Nav */
+  .nav{padding:0 14px;height:48px;gap:10px}
+  .logo{font-size:15px;gap:6px}
+  .logo-mark{width:26px;height:26px;border-radius:7px}
+  .logo-mark svg{width:13px;height:13px}
+  .update-text{display:none}
+
+  /* Landing */
+  .landing-hero{padding:36px 16px 28px}
+  .landing-hero h1{font-size:22px}
+  .landing-hero .landing-sub{font-size:13px;margin-bottom:20px}
+  .landing-actions{width:100%}
+  .landing-actions .btn-lg{width:100%;padding:14px 20px;font-size:16px}
+  .landing-note{font-size:11px}
+  .features{grid-template-columns:1fr;max-width:100%;padding:0 16px;gap:10px;margin-bottom:28px}
+  .feat-card{padding:18px 16px}
+  .feat-card h3{font-size:13px}
+  .feat-card p{font-size:11px}
+  .about{padding:0 16px 36px}
+  .about-box{padding:20px 16px}
+  .about-box h2{font-size:16px}
+  .about-box p{font-size:12px}
+  .about-box li{font-size:12px}
+
+  /* Hero */
+  .hero{padding:20px 14px 24px}
+  .hero-left h1{font-size:18px}
+  .hero-left p{font-size:12px}
+  .hero-inner{flex-direction:column;align-items:flex-start;gap:16px}
+  .stats-row{width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .stat-card{min-width:0;padding:10px 8px;text-align:center}
+  .stat-val{font-size:20px}
+  .stat-label{font-size:8px;letter-spacing:.5px}
+
+  /* Toolbar */
+  .toolbar{height:auto;flex-wrap:wrap;padding:8px 14px;gap:8px}
+  .tool-section{padding:0;border:none !important;flex-wrap:wrap}
+  .tool-label{font-size:9px}
+  .select-wrap select{font-size:12px;padding:8px 28px 8px 10px}
+  .pax-label{font-size:10px;min-width:36px}
+  .pax-stepper{height:32px}
+  .pax-stepper button{width:30px;font-size:15px}
+  .pax-stepper .pax-val{font-size:13px}
+  .tab-pills{margin-left:0;width:100%;justify-content:center}
+  .tab-pill{padding:8px 16px;font-size:12px}
+
+  /* Main content */
+  .main{padding:16px 14px 60px}
   .grid{grid-template-columns:1fr}
+  .section-title{font-size:14px}
+  .date-head h3{font-size:12px}
+
+  /* Cards */
+  .card-top{padding:10px 12px 0;gap:4px}
+  .chip{font-size:9px;padding:2px 6px}
+  .route{padding:10px 12px 0}
   .iata{font-size:22px}
+  .city-name{font-size:9px}
+  .flight-time{font-size:10px}
+  .route-mid{min-width:60px;padding:0 8px}
+  .flight-num{font-size:8px}
+  .price-section{padding:10px 12px}
   .price-num{font-size:24px}
-  .tab-pills{margin-left:0;width:100%}
-  .toolbar{height:auto;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;gap:8px}
-  .tool-section{padding:0;border:none !important}
-  .timestamps{max-width:48%}
-  .anon-banner-text{font-size:12px}
+  .price-sym{font-size:12px}
+  .price-type{font-size:9px}
+  .price-detail{font-size:9px}
+  .seats-ring{width:40px;height:40px}
+  .seats-ring-num{font-size:17px}
+  .seats-detail-main{font-size:12px}
+  .seats-detail-sub{font-size:10px}
+  .card-foot{padding:0 12px 10px;gap:6px}
+  .timestamps{font-size:9px;max-width:50%}
+  .book-link{padding:8px 12px;font-size:11px}
 }
+
 @media(max-width:400px){
-  .stats-row{gap:6px}
-  .stat-card{padding:8px 10px}
+  .landing-hero h1{font-size:20px}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .stat-card{padding:8px 6px}
   .stat-val{font-size:18px}
   .iata{font-size:18px}
-  .route-mid{min-width:50px;padding:0 6px}
+  .route-mid{min-width:44px;padding:0 4px}
   .price-section{flex-wrap:wrap;gap:6px}
   .price-right{margin-left:0;width:100%;flex-direction:row;justify-content:flex-end}
+  .card-foot{flex-wrap:wrap}
+  .book-link{width:100%;justify-content:center;padding:10px}
+  .pax-group{gap:2px}
+  .tool-section{gap:6px}
 }
 </style>
 </head>
