@@ -9,6 +9,7 @@ import { SlackNotifier } from './notifier/slack.js';
 import { PollExecutor } from './poller/poll-executor.js';
 import { Scheduler } from './poller/scheduler.js';
 import { OfferStore } from './store/offer-store.js';
+import { AnalyticsStore } from './store/analytics-store.js';
 import { startWebServer } from './web/server.js';
 import { closeBrowser } from './adapters/browser-pool.js';
 import { logger } from './utils/logger.js';
@@ -46,13 +47,17 @@ async function main() {
     ? `${process.env.DATA_DIR}/offers.db`
     : undefined; // defaults to ./data/offers.db
   const offerStore = new OfferStore(dbPath);
+  const analyticsDbPath = process.env.DATA_DIR
+    ? `${process.env.DATA_DIR}/analytics.db`
+    : undefined;
+  const analyticsStore = new AnalyticsStore(analyticsDbPath);
   const executor = new PollExecutor(cooldown, slack);
   executor.setOfferStore(offerStore);
   const scheduler = new Scheduler(config, searchesConfig, adapters, executor, cooldown);
 
   // Start dashboard web server
   const port = parseInt(process.env.PORT || '3737', 10);
-  startWebServer(offerStore, port);
+  startWebServer(offerStore, analyticsStore, port);
   logger.info({ port }, 'Dashboard available');
 
   if (!slack.isEnabled()) {
@@ -78,6 +83,7 @@ async function main() {
     scheduler.stop();
     cooldown.close();
     offerStore.close();
+    analyticsStore.close();
     await closeBrowser();
     process.exit(0);
   };

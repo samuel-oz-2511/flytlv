@@ -2,17 +2,68 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import type { OfferStore } from '../store/offer-store.js';
-import { geoGuard } from './geo-guard.js';
+import type { AnalyticsStore } from '../store/analytics-store.js';
+import { geoGuard, getClientIP } from './geo-guard.js';
 import { childLogger } from '../utils/logger.js';
 
 const log = childLogger('web');
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ANALYTICS_PWD = process.env.ANALYTICS_PASSWORD || 'flytlv2026';
 
-export function startWebServer(store: OfferStore, port: number = 3737): void {
+export function startWebServer(store: OfferStore, analytics: AnalyticsStore, port: number = 3737): void {
   const app = express();
+  app.use(express.json());
 
-  // Geo-IP guard: Israel only
-  app.use(geoGuard());
+  // Geo-IP guard: Israel only (skip for /analytics)
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/analytics')) return next();
+    return geoGuard()(req, res, next);
+  });
+
+  // --- Analytics tracking middleware ---
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api/') || req.path.startsWith('/analytics')) return next();
+    try {
+      analytics.recordEvent({
+        type: 'page_view',
+        ip: getClientIP(req),
+        page: req.path,
+        referrer: req.headers.referer || req.headers.referrer as string || '',
+        userAgent: req.headers['user-agent'] || '',
+        country: 'IL',
+      });
+    } catch (e) { /* don't break the request */ }
+    next();
+  });
+
+  // --- Analytics event endpoint ---
+  app.post('/api/analytics/event', (req, res) => {
+    try {
+      const { event } = req.body || {};
+      if (event === 'enter_dashboard' || event === 'beacon') {
+        analytics.recordEvent({
+          type: event,
+          ip: getClientIP(req),
+          page: '/dashboard',
+          referrer: req.headers.referer || '',
+          userAgent: req.headers['user-agent'] || '',
+          country: 'IL',
+        });
+      }
+    } catch (e) { /* silent */ }
+    res.json({ ok: true });
+  });
+
+  // --- Analytics admin dashboard ---
+  app.get('/analytics', (req, res) => {
+    if (req.query.pwd !== ANALYTICS_PWD) {
+      res.send(analyticsLoginHtml());
+      return;
+    }
+    const range = (req.query.range as string) || '30d';
+    const data = analytics.getDashboard(range as any);
+    res.send(analyticsHtml(data, range, ANALYTICS_PWD));
+  });
 
   // --- Data routes (open) ---
   app.get('/api/offers', (req, res) => {
@@ -519,6 +570,10 @@ function enterDashboard(){
   document.querySelector('.toolbar').style.display='';
   document.getElementById('main').style.display='';
   load();
+  // Track dashboard enter
+  fetch('/api/analytics/event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'enter_dashboard'})}).catch(()=>{});
+  // Beacon on page hide for time-on-site
+  if(!window._beaconSet){window._beaconSet=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')navigator.sendBeacon('/api/analytics/event',JSON.stringify({event:'beacon'}))})}
 }
 function showLanding(){
   document.getElementById('landing').style.display='flex';
@@ -760,4 +815,119 @@ setInterval(()=>{ if(document.getElementById('main').style.display!=='none') loa
 </script>
 </body>
 </html>`;
+}
+
+function analyticsLoginHtml(): string {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FlyTLV Analytics</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,system-ui,sans-serif;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;color:#fff}
+.box{background:#1e293b;border-radius:16px;padding:40px;width:360px;max-width:90vw;box-shadow:0 20px 40px rgba(0,0,0,.3)}
+h1{font-size:20px;font-weight:800;margin-bottom:4px}p{color:#94a3b8;font-size:13px;margin-bottom:24px}
+input{width:100%;padding:12px;border:1.5px solid #334155;border-radius:8px;background:#0f172a;color:#fff;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px}
+input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+button{width:100%;padding:12px;border:none;border-radius:8px;background:#3b82f6;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+button:hover{background:#2563eb}</style></head>
+<body><div class="box"><h1>FlyTLV Analytics</h1><p>Enter password to access dashboard</p>
+<form method="GET" action="/analytics"><input type="password" name="pwd" placeholder="Password" autofocus>
+<button type="submit">Access Dashboard</button></form></div></body></html>`;
+}
+
+function analyticsHtml(data: any, range: string, pwd: string): string {
+  const d = data;
+  const totalPV = d.daily.reduce((s: number, r: any) => s + r.page_views, 0);
+  const totalUV = d.totals.total_visitors;
+  const totalAllTime = d.totals.totalAllTime;
+  const todayPV = d.today.page_views;
+  const todayUV = d.today.unique_visitors;
+  const todayDE = d.today.dashboard_enters;
+  const totalDE = d.dashboardEnters;
+  const mobile = d.devices.find((x: any) => x.device_type === 'mobile')?.count || 0;
+  const desktop = d.devices.find((x: any) => x.device_type === 'desktop')?.count || 0;
+  const mPct = totalUV > 0 ? Math.round(mobile / (mobile + desktop) * 100) : 0;
+
+  const maxPV = Math.max(...d.daily.map((r: any) => r.page_views), 1);
+  const maxUV = Math.max(...d.daily.map((r: any) => r.unique_visitors), 1);
+  const barW = d.daily.length > 0 ? Math.max(4, Math.floor(760 / d.daily.length) - 2) : 20;
+  let chartBars = '';
+  d.daily.forEach((r: any, i: number) => {
+    const x = i * (barW + 2);
+    const hPV = Math.round((r.page_views / maxPV) * 140);
+    const hUV = Math.round((r.unique_visitors / maxUV) * 140);
+    chartBars += '<rect x="' + x + '" y="' + (150 - hPV) + '" width="' + barW + '" height="' + hPV + '" rx="2" fill="rgba(59,130,246,.3)"/>'
+      + '<rect x="' + x + '" y="' + (150 - hUV) + '" width="' + barW + '" height="' + hUV + '" rx="2" fill="#3b82f6"/>';
+  });
+  const chartW = d.daily.length * (barW + 2);
+
+  const refRows = d.topReferrers.map((r: any) =>
+    '<tr><td style="padding:8px 12px;font-size:13px;color:#e2e8f0;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.referrer) + '</td><td style="padding:8px 12px;font-size:13px;font-weight:700;color:#fff;text-align:right">' + r.count + '</td></tr>'
+  ).join('');
+
+  const countryRows = d.countries.map((r: any) =>
+    '<tr><td style="padding:8px 12px;font-size:13px;color:#e2e8f0">' + (r.country || 'Unknown') + '</td><td style="padding:8px 12px;font-size:13px;font-weight:700;color:#fff;text-align:right">' + r.count + '</td></tr>'
+  ).join('');
+
+  const milestoneRows = d.milestones.map((m: any) =>
+    '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #334155"><span style="font-size:14px;font-weight:700;color:#3b82f6">' + m.milestone.toLocaleString() + ' visitors</span><span style="font-size:12px;color:#94a3b8">' + new Date(m.reached_at).toLocaleDateString() + '</span></div>'
+  ).join('');
+
+  const ar = (r: string) => r === range ? 'background:#3b82f6;color:#fff' : 'background:#1e293b;color:#94a3b8';
+
+  const css = '*{margin:0;padding:0;box-sizing:border-box}'
+    + "body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#fff;min-height:100vh;-webkit-font-smoothing:antialiased}"
+    + '.wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px}'
+    + '.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}'
+    + '.head h1{font-size:22px;font-weight:900;letter-spacing:-.5px}.head h1 span{color:#3b82f6}'
+    + '.ranges{display:flex;gap:4px}.ranges a{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s}.ranges a:hover{background:#334155;color:#fff}'
+    + '.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:28px}'
+    + '.card{background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155}'
+    + '.card-val{font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1}'
+    + '.card-val.blue{color:#3b82f6}.card-val.green{color:#22c55e}.card-val.orange{color:#f59e0b}.card-val.purple{color:#a78bfa}'
+    + '.card-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-top:4px;font-weight:600}'
+    + '.section{background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155;margin-bottom:16px}'
+    + '.section h2{font-size:14px;font-weight:700;margin-bottom:14px;color:#e2e8f0}'
+    + 'table{width:100%;border-collapse:collapse}tr:not(:last-child) td{border-bottom:1px solid #334155}'
+    + '.chart-wrap{overflow-x:auto}'
+    + '.legend{display:flex;gap:16px;margin-top:10px}.legend span{font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:4px}.legend .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}'
+    + '.device-bar{height:20px;border-radius:10px;overflow:hidden;display:flex;margin-bottom:8px}.device-bar div{height:100%}'
+    + '.device-labels{display:flex;justify-content:space-between;font-size:12px;color:#94a3b8}'
+    + '.back{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#64748b;margin-bottom:16px;text-decoration:none}.back:hover{color:#94a3b8}'
+    + '@media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}.card-val{font-size:22px}}';
+
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<title>FlyTLV Analytics</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">'
+    + '<style>' + css + '</style></head><body><div class="wrap">'
+    + '<a class="back" href="/">&larr; Back to FlyTLV</a>'
+    + '<div class="head"><h1>Fly<span>TLV</span> Analytics</h1>'
+    + '<div class="ranges">'
+    + '<a href="/analytics?pwd=' + pwd + '&range=7d" style="' + ar('7d') + '">7 days</a>'
+    + '<a href="/analytics?pwd=' + pwd + '&range=30d" style="' + ar('30d') + '">30 days</a>'
+    + '<a href="/analytics?pwd=' + pwd + '&range=all" style="' + ar('all') + '">All time</a>'
+    + '</div></div>'
+    + '<div class="cards">'
+    + '<div class="card"><div class="card-val blue">' + totalAllTime.toLocaleString() + '</div><div class="card-label">All-time visitors</div></div>'
+    + '<div class="card"><div class="card-val green">' + todayUV + '</div><div class="card-label">Today\'s visitors</div></div>'
+    + '<div class="card"><div class="card-val orange">' + totalPV.toLocaleString() + '</div><div class="card-label">Page views (' + range + ')</div></div>'
+    + '<div class="card"><div class="card-val purple">' + totalDE.toLocaleString() + '</div><div class="card-label">Dashboard views (' + range + ')</div></div>'
+    + '<div class="card"><div class="card-val blue">' + todayPV + '</div><div class="card-label">Today\'s page views</div></div>'
+    + '<div class="card"><div class="card-val green">' + todayDE + '</div><div class="card-label">Today\'s dashboard</div></div>'
+    + '</div>'
+    + '<div class="section"><h2>Traffic (' + range + ')</h2>'
+    + '<div class="chart-wrap"><svg width="' + Math.max(chartW, 200) + '" height="160" style="display:block">' + chartBars + '</svg></div>'
+    + '<div class="legend"><span><span class="dot" style="background:#3b82f6"></span> Unique visitors</span><span><span class="dot" style="background:rgba(59,130,246,.3)"></span> Page views</span></div></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">'
+    + '<div class="section" style="margin-bottom:0"><h2>Devices</h2>'
+    + '<div class="device-bar"><div style="width:' + mPct + '%;background:#3b82f6"></div><div style="width:' + (100 - mPct) + '%;background:#8b5cf6"></div></div>'
+    + '<div class="device-labels"><span>Mobile ' + mPct + '% (' + mobile + ')</span><span>Desktop ' + (100 - mPct) + '% (' + desktop + ')</span></div></div>'
+    + '<div class="section" style="margin-bottom:0"><h2>Countries</h2>'
+    + '<table>' + (countryRows || '<tr><td style="padding:8px;color:#64748b;font-size:13px">No data yet</td></tr>') + '</table></div></div>'
+    + '<div class="section"><h2>Top Referrers</h2>'
+    + '<table>' + (refRows || '<tr><td style="padding:8px;color:#64748b;font-size:13px">No referrer data yet &mdash; share your link!</td></tr>') + '</table></div>'
+    + (d.milestones.length > 0 ? '<div class="section"><h2>Milestones</h2>' + milestoneRows + '</div>' : '')
+    + '<div style="text-align:center;padding:20px;font-size:11px;color:#475569">FlyTLV Analytics &middot; Self-hosted &middot; No cookies &middot; Privacy-first</div>'
+    + '</div></body></html>';
+}
+
+function esc(s: string): string {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

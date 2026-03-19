@@ -15,7 +15,7 @@ function isLocalIP(ip: string): boolean {
     || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.');
 }
 
-function getClientIP(req: Request): string {
+export function getClientIP(req: Request): string {
   // Respect X-Forwarded-For behind reverse proxy (Caddy, Cloudflare, etc.)
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) {
