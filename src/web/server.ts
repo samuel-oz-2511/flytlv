@@ -48,7 +48,11 @@ function dashboardHtml(): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FlyTLV - Last-Minute Flights from Israel</title>
+<title>FlyTLV - Rescue Flights from Ben Gurion</title>
+<meta property="og:title" content="FlyTLV - Rescue Flights from Ben Gurion">
+<meta property="og:description" content="Free real-time scanner for rescue flights out of TLV. Scans El Al, Arkia, Israir &amp; Air Haifa every few minutes. No signup needed.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://claim.travel">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
