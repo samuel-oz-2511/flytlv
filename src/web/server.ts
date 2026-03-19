@@ -356,7 +356,7 @@ button{font-family:inherit;cursor:pointer}
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0011.5 2 1.5 1.5 0 0010 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
     </div>
     <h1>Find Rescue Flights<br>Out of <span>Ben Gurion</span></h1>
-    <p class="landing-sub">FlyTLV scans all available flights departing TLV in the <strong>next 7 days</strong> across El Al, Arkia, Israir, and Air Haifa. This is not a vacation planner &mdash; it's a real-time tool to help families and individuals find a way out of Israel when every seat counts.</p>
+    <p class="landing-sub">Built by a parent who couldn't find a flight for his family. FlyTLV scans all available flights departing TLV in the <strong>next 7 days</strong> across El Al, Arkia, Israir, and Air Haifa. Airlines release seats unpredictably throughout the day &mdash; this tool catches them the moment they appear.</p>
     <div class="landing-actions">
       <button class="btn btn-primary btn-lg" onclick="enterDashboard()">Show Me the Flights</button>
     </div>
@@ -397,6 +397,17 @@ button{font-family:inherit;cursor:pointer}
         <li>One-click booking links direct to the airline &mdash; FlyTLV never sells tickets, only finds them</li>
       </ul>
       <p>This service is only accessible from within Israel. We do not collect any personal data. FlyTLV is free and independent &mdash; we are not affiliated with any airline.</p>
+    </div>
+  </div>
+
+  <div class="about" style="padding-top:0">
+    <div class="about-box" style="border-top:3px solid var(--blue)">
+      <h2>Why I Built This</h2>
+      <p>We're a young family &mdash; my partner, myself, and our three-year-old son. Before the war, he went to nursery every morning. It was a 35-minute drive, but it was his world &mdash; his friends, his teachers, his routine.</p>
+      <p>When things escalated, the nursery mostly shut down. Even the partial reopening didn't work for us &mdash; we couldn't justify the drive under the circumstances. So our son stayed home. Day after day, with no routine, no friends around, no familiar faces beyond us.</p>
+      <p>At first he asked about his teachers and friends constantly. Then less. Then he started forgetting their names. Every day the war continues, he loses a little more of the life he had before. That's when we decided we need to get out &mdash; even temporarily &mdash; and find him a normal environment abroad.</p>
+      <p>But finding flights was impossible. Airlines release rescue seats unpredictably throughout the day. By the time you spot availability, it's gone. I'd spend hours refreshing airline websites, missing seats by minutes.</p>
+      <p>So I built FlyTLV. It scans every Israeli carrier around the clock and shows you the moment a seat opens up. I built it for my family &mdash; and I'm sharing it because I know we're not the only ones going through this.</p>
     </div>
   </div>
 </div>
