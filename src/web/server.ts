@@ -337,12 +337,12 @@ button{font-family:inherit;cursor:pointer}
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="logo">
+  <a class="logo" href="#" onclick="showLanding();return false" style="text-decoration:none;color:inherit">
     <div class="logo-mark">
       <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
     </div>
     FlyTLV
-  </div>
+  </a>
   <div class="nav-right">
     <div class="live-pill"><span class="live-dot"></span>Live</div>
     <span class="update-text" id="lastUpdate"></span>
@@ -463,13 +463,19 @@ button{font-family:inherit;cursor:pointer}
 let offers=[], statusFilter='';
 let prefs={adults:1,children:0,infants:0};
 
-/* ── Enter Dashboard ── */
+/* ── Navigation ── */
 function enterDashboard(){
   document.getElementById('landing').style.display='none';
   document.querySelector('.hero').style.display='';
   document.querySelector('.toolbar').style.display='';
   document.getElementById('main').style.display='';
   load();
+}
+function showLanding(){
+  document.getElementById('landing').style.display='flex';
+  document.querySelector('.hero').style.display='none';
+  document.querySelector('.toolbar').style.display='none';
+  document.getElementById('main').style.display='none';
 }
 
 /* ── Pax ── */
