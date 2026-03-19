@@ -132,7 +132,7 @@ button{font-family:inherit;cursor:pointer}
 
 /* Pax picker */
 .pax-group{display:flex;align-items:center;gap:4px}
-.pax-label{font-size:11px;color:var(--text4);font-weight:600;min-width:24px}
+.pax-label{font-size:11px;color:var(--text4);font-weight:600;min-width:42px}
 .pax-stepper{display:flex;align-items:center;border:1px solid var(--border);border-radius:6px;overflow:hidden;height:28px}
 .pax-stepper button{width:26px;height:100%;border:none;background:var(--bg);color:var(--text2);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
 .pax-stepper button:hover{background:var(--border)}
@@ -439,9 +439,9 @@ button{font-family:inherit;cursor:pointer}
     <div class="select-wrap"><select id="fDest"><option value="">All destinations</option></select></div>
   </div>
   <div class="tool-section" id="paxSection">
-    <div class="pax-group"><span class="pax-label">A</span><div class="pax-stepper"><button onclick="adjPax('adults',-1)">&minus;</button><span class="pax-val" id="paxAdults">1</span><button onclick="adjPax('adults',1)">+</button></div></div>
-    <div class="pax-group"><span class="pax-label">C</span><div class="pax-stepper"><button onclick="adjPax('children',-1)">&minus;</button><span class="pax-val" id="paxChildren">0</span><button onclick="adjPax('children',1)">+</button></div></div>
-    <div class="pax-group"><span class="pax-label">I</span><div class="pax-stepper"><button onclick="adjPax('infants',-1)">&minus;</button><span class="pax-val" id="paxInfants">0</span><button onclick="adjPax('infants',1)">+</button></div></div>
+    <div class="pax-group"><span class="pax-label">Adults</span><div class="pax-stepper"><button onclick="adjPax('adults',-1)">&minus;</button><span class="pax-val" id="paxAdults">1</span><button onclick="adjPax('adults',1)">+</button></div></div>
+    <div class="pax-group"><span class="pax-label">Kids</span><div class="pax-stepper"><button onclick="adjPax('children',-1)">&minus;</button><span class="pax-val" id="paxChildren">0</span><button onclick="adjPax('children',1)">+</button></div></div>
+    <div class="pax-group"><span class="pax-label">Infants</span><div class="pax-stepper"><button onclick="adjPax('infants',-1)">&minus;</button><span class="pax-val" id="paxInfants">0</span><button onclick="adjPax('infants',1)">+</button></div></div>
   </div>
   <div class="tab-pills" id="statusBtns">
     <button class="tab-pill active" data-v="">All</button>
