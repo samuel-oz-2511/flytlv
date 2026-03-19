@@ -108,10 +108,14 @@ export class PollExecutor {
     }
 
     // Record all valid offers to the dashboard store
-    if (this.offerStore && allValidOffers.length > 0) {
+    if (this.offerStore) {
       try {
-        this.offerStore.recordOffers(allValidOffers, offerFingerprint);
-        this.offerStore.markGone(adapter.name, 12);
+        if (allValidOffers.length > 0) {
+          this.offerStore.recordOffers(allValidOffers, offerFingerprint);
+        }
+        // Always mark stale offers as gone — even when 0 results returned
+        // (site down, no flights, etc.) so dashboard doesn't show hours-old data
+        this.offerStore.markGone(adapter.name, 15);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         log.error({ error: msg }, 'Failed to record offers to store');

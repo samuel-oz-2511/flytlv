@@ -3,6 +3,8 @@ import { childLogger } from '../utils/logger.js';
 
 const log = childLogger('browser-pool');
 
+const PROXY_URL = process.env.SCRAPER_PROXY || ''; // e.g. socks5://127.0.0.1:1080
+
 /**
  * Shared browser instance for all Playwright-based scrapers.
  * Reuses a single Chromium process to save memory.
@@ -11,11 +13,14 @@ let browser: Browser | null = null;
 
 export async function getBrowser(): Promise<Browser> {
   if (!browser || !browser.isConnected()) {
-    log.info('Launching Chromium...');
-    browser = await chromium.launch({
-      headless: true,
-      args: ['--disable-blink-features=AutomationControlled'],
-    });
+    const args = ['--disable-blink-features=AutomationControlled'];
+    if (PROXY_URL) {
+      args.push(`--proxy-server=${PROXY_URL}`);
+      log.info({ proxy: PROXY_URL }, 'Launching Chromium with proxy');
+    } else {
+      log.info('Launching Chromium...');
+    }
+    browser = await chromium.launch({ headless: true, args });
   }
   return browser;
 }

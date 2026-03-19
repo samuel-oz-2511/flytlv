@@ -1,28 +1,35 @@
 searches:
-  # Rolling 5-day window from "now" — checks flights departing in the
-  # next 5 days only. Adapters that cache all dates per-destination
-  # will naturally return only matching dates.
+  # Rolling 7-day window from "now" — checks flights departing in the
+  # next 7 days. This is a rescue-flight scanner, not a vacation planner.
 
   - name: "Israel to Greece & Cyprus (priority)"
     origins: [TLV]
     destinations: [ATH, SKG, RHO, HER, CFU, JMK, JTR, LCA, PFO, ECN]
-    rolling_days: 5
+    rolling_days: 7
     passengers:
-      adults: 2
-      children: 1
+      adults: 1
+      children: 0
+
+  - name: "Israel to Spain & Italy (priority — connecting to Madrid)"
+    origins: [TLV]
+    destinations: [MAD, BCN, FCO, MXP]
+    rolling_days: 7
+    passengers:
+      adults: 1
+      children: 0
 
   - name: "Israel to Western Europe"
     origins: [TLV]
-    destinations: [BCN, FCO, CDG, LHR, AMS, BER, VIE, PRG, ZRH, MXP, LIS]
-    rolling_days: 5
+    destinations: [CDG, LHR, AMS, BER, VIE, PRG, ZRH, LIS]
+    rolling_days: 7
     passengers:
-      adults: 2
-      children: 1
+      adults: 1
+      children: 0
 
   - name: "Israel to Eastern Europe"
     origins: [TLV]
     destinations: [SOF, BUD, WAW, OTP, BEG]
-    rolling_days: 5
+    rolling_days: 7
     passengers:
-      adults: 2
-      children: 1
+      adults: 1
+      children: 0

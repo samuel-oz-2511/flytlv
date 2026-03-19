@@ -96,9 +96,10 @@ export class IsrairScraperAdapter implements AirlineAdapter {
       await page.goto('https://www.israir.co.il/', { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {});
       await page.waitForTimeout(5000);
 
-      if (destList && destList.length > 0) {
-        this.activeDestinations = new Set(destList);
-        log.info({ count: destList.length }, 'Israir: loaded active destinations');
+      const dests = destList as string[] | null;
+      if (dests && dests.length > 0) {
+        this.activeDestinations = new Set(dests);
+        log.info({ count: dests.length }, 'Israir: loaded active destinations');
       } else {
         // Fallback: accept any destination
         this.activeDestinations = null;

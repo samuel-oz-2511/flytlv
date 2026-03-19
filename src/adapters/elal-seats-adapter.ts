@@ -1,9 +1,12 @@
 import type { AirlineAdapter } from '../types/airline.js';
 import { AirlineSource } from '../types/airline.js';
 import type { SearchQuery, NormalizedOffer } from '../types/offer.js';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 import { childLogger } from '../utils/logger.js';
 
 const log = childLogger('elal-seats');
+const PROXY_URL = process.env.SCRAPER_PROXY || '';
+const proxyAgent = PROXY_URL ? new SocksProxyAgent(PROXY_URL) : undefined;
 
 const API_URL = 'https://www.elal.com/api/SeatAvailability/lang/heb/flights';
 
@@ -124,12 +127,32 @@ export class ElAlSeatsAdapter implements AirlineAdapter {
     }
 
     try {
-      const res = await fetch(API_URL, {
+      const fetchOpts: RequestInit & { dispatcher?: unknown } = {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
           'Accept': 'application/json',
         },
-      });
+      };
+      // Node 18+ fetch doesn't natively support agent; use undici dispatcher
+      // For SOCKS proxy, we use https module fallback via socks-proxy-agent
+      let res: Response;
+      if (proxyAgent) {
+        const https = await import('https');
+        const data = await new Promise<string>((resolve, reject) => {
+          const req = https.get(API_URL, { agent: proxyAgent, headers: fetchOpts.headers as Record<string, string> }, (resp) => {
+            let body = '';
+            resp.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+            resp.on('end', () => resolve(body));
+          });
+          req.on('error', reject);
+        });
+        const parsed = JSON.parse(data) as SeatApiResponse;
+        this.cache = { data: parsed, ts: Date.now() };
+        const routeCount = [...(parsed.flightsFromIsrael || []), ...(parsed.flightsToIsrael || [])].length;
+        log.info({ routes: routeCount }, 'El Al seat data refreshed (via proxy)');
+        return parsed;
+      }
+      res = await fetch(API_URL, fetchOpts);
 
       if (!res.ok) {
         log.error({ status: res.status }, 'El Al API returned error');
