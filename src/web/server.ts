@@ -617,8 +617,7 @@ const CITIES = {
 };
 function city(c){ return CITIES[c]||c }
 function acl(n){ const l=n.toLowerCase(); if(l.includes('el al'))return'elal'; if(l.includes('arkia'))return'arkia'; if(l.includes('israir'))return'israir'; return'airhaifa' }
-const PRIORITY = new Set(['MAD','BCN','ATH','FCO','MXP']);
-function isPri(d){ return PRIORITY.has(d) }
+function isPri(d){ return false }
 
 function fmtDate(d){
   const dt=new Date(d+'T00:00:00'), now=new Date(); now.setHours(0,0,0,0);
@@ -664,8 +663,7 @@ function renderCard(o){
   h+='<div class="route">';
   h+='<div class="route-point"><span class="iata">'+o.origin+'</span><span class="city-name">'+city(o.origin)+'</span>'+(o.departure_time?'<span class="flight-time">'+o.departure_time+'</span>':'')+'</div>';
   h+='<div class="route-mid"><div class="route-line"><span class="dot dep"></span><span class="dash"></span><span class="plane-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0011.5 2 1.5 1.5 0 0010 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></span><span class="dash"></span><span class="dot arr"></span></div><span class="flight-num">'+o.flight_number+'</span></div>';
-  const connectHint = (!gone && o.destination!=='MAD' && isPri(o.destination))
-    ? '<span class="connect-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Madrid</span>' : '';
+  const connectHint = '';
   h+='<div class="route-point end"><span class="iata">'+o.destination+'</span><span class="city-name">'+city(o.destination)+'</span>'+(o.arrival_time?'<span class="flight-time">'+o.arrival_time+'</span>':'')+connectHint+'</div>';
   h+='</div>';
 
