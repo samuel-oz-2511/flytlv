@@ -14,7 +14,16 @@ export function startWebServer(store: OfferStore, analytics: AnalyticsStore, por
   const app = express();
   app.use(express.json());
 
-  // Geo-IP guard: Israel only (skip for /analytics)
+  // --- Maintenance mode ---
+  const MAINTENANCE = process.env.MAINTENANCE === 'true';
+  if (MAINTENANCE) {
+    app.use((req, res, next) => {
+      if (req.path.startsWith('/api/') || req.path.startsWith('/analytics')) return next();
+      res.send(maintenanceHtml());
+    });
+  }
+
+  // Geo-IP guard: Israel only (skip for /analytics and maintenance)
   app.use((req, res, next) => {
     if (req.path.startsWith('/analytics')) return next();
     return geoGuard()(req, res, next);
@@ -928,4 +937,28 @@ function analyticsHtml(data: any, range: string, pwd: string): string {
 
 function esc(s: string): string {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function maintenanceHtml(): string {
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<title>FlyTLV - Temporarily Unavailable</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">'
+    + '<style>*{margin:0;padding:0;box-sizing:border-box}'
+    + "body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased}"
+    + '.box{text-align:center;max-width:480px;padding:40px 24px}'
+    + '.logo{display:inline-flex;align-items:center;gap:8px;font-size:20px;font-weight:800;margin-bottom:32px}'
+    + '.logo-mark{width:34px;height:34px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:10px;display:flex;align-items:center;justify-content:center}'
+    + '.logo-mark svg{width:18px;height:18px}'
+    + 'h1{font-size:24px;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}'
+    + 'p{color:#94a3b8;font-size:14px;line-height:1.7;margin-bottom:12px}'
+    + '.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#f59e0b;background:rgba(245,158,11,.1);padding:6px 14px;border-radius:20px;border:1px solid rgba(245,158,11,.2);margin-bottom:24px}'
+    + '.pill span{width:6px;height:6px;background:#f59e0b;border-radius:50%;animation:pulse 2s infinite}'
+    + '@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}'
+    + '</style></head><body><div class="box">'
+    + '<div class="logo"><div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></div>FlyTLV</div>'
+    + '<div class="pill"><span></span>Maintenance</div>'
+    + '<h1>We\'ll be back shortly</h1>'
+    + '<p>FlyTLV is temporarily offline for maintenance. Our flight scanners are still running in the background and we\'ll be back up soon.</p>'
+    + '<p style="color:#64748b;font-size:12px">Rescue flight scanner for Ben Gurion Airport</p>'
+    + '</div></body></html>';
 }

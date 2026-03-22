@@ -55,6 +55,52 @@ export class SlackNotifier {
     }
   }
 
+  async sendFamilyAlert(offer: NormalizedOffer): Promise<void> {
+    if (!this.isEnabled()) return;
+    await this.rateLimiter.waitForToken();
+
+    const seats = offer.seatsAvailable !== null ? offer.seatsAvailable : '?';
+    const price4 = offer.totalPrice === 0
+      ? 'Check airline for pricing'
+      : `Est. family price: ${offer.currency} ${(offer.pricePerAdult * 2 + offer.pricePerChild * 1 + offer.pricePerAdult * 0.1).toFixed(0)} (2A+1K+1I)`;
+
+    const payload = {
+      text: `FAMILY MATCH: ${offer.airline} ${offer.origin}->${offer.destination} ${offer.departureDate} — ${seats} seats — ${price4}`,
+      blocks: [
+        {
+          type: 'header',
+          text: { type: 'plain_text', text: `👨‍👩‍👦 FAMILY MATCH — ${offer.airline}`, emoji: true },
+        },
+        {
+          type: 'section',
+          fields: [
+            { type: 'mrkdwn', text: `*Route:*\n${offer.origin} → ${offer.destination}` },
+            { type: 'mrkdwn', text: `*Date:*\n${offer.departureDate}` },
+            { type: 'mrkdwn', text: `*Time:*\n${offer.departureTime || '—'}` },
+            { type: 'mrkdwn', text: `*Seats:*\n${seats}` },
+            { type: 'mrkdwn', text: `*${price4}*` },
+            { type: 'mrkdwn', text: `*Book:*\n${offer.bookingUrl ? `<${offer.bookingUrl}|Book Now>` : 'Check airline'}` },
+          ],
+        },
+        { type: 'divider' },
+      ],
+    };
+
+    try {
+      if (this.config.mode === 'webhook') {
+        await axios.post(this.config.webhookUrl, payload, { timeout: 10_000 });
+      } else {
+        await axios.post('https://slack.com/api/chat.postMessage', {
+          channel: this.config.channelId, ...payload,
+        }, { headers: { Authorization: `Bearer ${this.config.botToken}` }, timeout: 10_000 });
+      }
+      log.info({ offerId: offer.id }, 'Family alert sent');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      log.error({ error: msg }, 'Failed to send family alert');
+    }
+  }
+
   private buildPayload(offer: NormalizedOffer): Record<string, unknown> {
     const isSeatsOnly = offer.totalPrice === 0; // El Al seat availability (no pricing)
 

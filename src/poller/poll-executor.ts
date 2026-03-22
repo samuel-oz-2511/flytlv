@@ -76,7 +76,13 @@ export class PollExecutor {
               if (newOffers.length === 0) continue;
 
               for (const offer of newOffers) {
+                // Only alert if enough seats for at least 1A+1C/I (family minimum)
+                if (offer.seatsAvailable !== null && offer.seatsAvailable < 2) continue;
                 await this.slack.sendAlert(offer);
+                // Flag perfect family match: 4+ seats for 2A+1I+1K
+                if (offer.seatsAvailable === null || offer.seatsAvailable >= 4) {
+                  await this.slack.sendFamilyAlert(offer);
+                }
                 routeAlerts++;
               }
 
