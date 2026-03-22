@@ -20,9 +20,28 @@ export class SlackNotifier {
 
   constructor(private readonly config: AppConfig['slack']) {}
 
+  private get webhookUrls(): string[] {
+    return this.config.webhookUrl
+      .split(',')
+      .map(u => u.trim())
+      .filter(u => u.length > 0);
+  }
+
   isEnabled(): boolean {
-    if (this.config.mode === 'webhook') return !!this.config.webhookUrl;
+    if (this.config.mode === 'webhook') return this.webhookUrls.length > 0;
     return !!(this.config.botToken && this.config.channelId);
+  }
+
+  private async postToWebhooks(payload: Record<string, unknown>): Promise<void> {
+    if (this.config.mode === 'webhook') {
+      await Promise.allSettled(
+        this.webhookUrls.map(url => axios.post(url, payload, { timeout: 10_000 }))
+      );
+    } else {
+      await axios.post('https://slack.com/api/chat.postMessage', {
+        channel: this.config.channelId, ...payload,
+      }, { headers: { Authorization: `Bearer ${this.config.botToken}` }, timeout: 10_000 });
+    }
   }
 
   async sendAlert(offer: NormalizedOffer): Promise<void> {
@@ -36,18 +55,7 @@ export class SlackNotifier {
     const payload = this.buildPayload(offer);
 
     try {
-      if (this.config.mode === 'webhook') {
-        await axios.post(this.config.webhookUrl, payload, { timeout: 10_000 });
-      } else {
-        await axios.post('https://slack.com/api/chat.postMessage', {
-          channel: this.config.channelId,
-          ...payload,
-        }, {
-          headers: { Authorization: `Bearer ${this.config.botToken}` },
-          timeout: 10_000,
-        });
-      }
-
+      await this.postToWebhooks(payload);
       log.info({ offerId: offer.id, airline: offer.airline }, 'Slack alert sent');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -87,13 +95,7 @@ export class SlackNotifier {
     };
 
     try {
-      if (this.config.mode === 'webhook') {
-        await axios.post(this.config.webhookUrl, payload, { timeout: 10_000 });
-      } else {
-        await axios.post('https://slack.com/api/chat.postMessage', {
-          channel: this.config.channelId, ...payload,
-        }, { headers: { Authorization: `Bearer ${this.config.botToken}` }, timeout: 10_000 });
-      }
+      await this.postToWebhooks(payload);
       log.info({ offerId: offer.id }, 'Family alert sent');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
