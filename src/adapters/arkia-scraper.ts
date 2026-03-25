@@ -77,7 +77,7 @@ export class ArkiaScraperAdapter implements AirlineAdapter {
 
       // Log first result's raw text for debugging origin detection
       if (results.length > 0) {
-        log.debug({ route: `${query.origin}-${query.destination}`, sample: results[0].text.slice(0, 300), html: results[0].html.slice(0, 500) }, 'Arkia sample card');
+        log.info({ route: `${query.origin}-${query.destination}`, sample: results[0].text.slice(0, 400), html: results[0].html.slice(0, 600) }, 'Arkia sample card');
       }
 
       const offers: NormalizedOffer[] = [];
