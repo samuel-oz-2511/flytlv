@@ -279,12 +279,14 @@ export class ElAlScraperAdapter implements AirlineAdapter {
         const depTime = f.departureTime || f.departure?.time || f.segments?.[0]?.departureTime || '';
         const arrTime = f.arrivalTime || f.arrival?.time || f.segments?.[0]?.arrivalTime || '';
         const flightNum = f.flightNumber || f.marketingFlight || f.segments?.[0]?.flightNumber || '';
+        const actualOrigin = f.origin || f.departure?.airport || f.segments?.[0]?.origin || query.origin;
+        const actualDest = f.destination || f.arrival?.airport || f.segments?.[0]?.destination || query.destination;
 
         offers.push({
-          id: `LY-${flightNum || query.destination}-${query.departureDate}-${depTime}-${price}`,
+          id: `LY-${flightNum || actualDest}-${query.departureDate}-${depTime}-${price}`,
           airline: 'El Al',
-          origin: query.origin,
-          destination: query.destination,
+          origin: actualOrigin,
+          destination: actualDest,
           departureDate: query.departureDate,
           departureTime: depTime,
           arrivalTime: arrTime,

@@ -2,8 +2,12 @@ searches:
   # Rolling 7-day window from "now" — checks flights departing in the
   # next 7 days. This is a rescue-flight scanner, not a vacation planner.
 
+  # Arkia/Israir ignore non-TLV origins in search params, so we only
+  # search from TLV. The scrapers extract the *actual* departure airport
+  # from the response (may be AQJ/TCP when airlines reroute via Aqaba/Taba).
+
   - name: "Israel to Greece & Cyprus (priority)"
-    origins: [TLV, AQJ, TCP]
+    origins: [TLV]
     destinations: [ATH, SKG, RHO, HER, CFU, JMK, JTR, LCA, PFO, ECN]
     rolling_days: 7
     passengers:
@@ -11,7 +15,7 @@ searches:
       children: 0
 
   - name: "Israel to Spain & Italy (priority — connecting to Madrid)"
-    origins: [TLV, AQJ, TCP]
+    origins: [TLV]
     destinations: [MAD, BCN, FCO, MXP]
     rolling_days: 7
     passengers:
@@ -19,7 +23,7 @@ searches:
       children: 0
 
   - name: "Israel to Western Europe"
-    origins: [TLV, AQJ, TCP]
+    origins: [TLV]
     destinations: [CDG, LHR, AMS, BER, VIE, PRG, ZRH, LIS]
     rolling_days: 7
     passengers:
@@ -27,7 +31,7 @@ searches:
       children: 0
 
   - name: "Israel to Eastern Europe"
-    origins: [TLV, AQJ, TCP]
+    origins: [TLV]
     destinations: [SOF, BUD, WAW, OTP, BEG]
     rolling_days: 7
     passengers:

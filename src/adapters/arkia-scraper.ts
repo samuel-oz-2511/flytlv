@@ -71,14 +71,10 @@ export class ArkiaScraperAdapter implements AirlineAdapter {
       const results = await page.$$eval('.search-result', (els) =>
         els.map((el) => ({
           text: el.textContent?.trim() || '',
-          html: el.innerHTML?.slice(0, 1000) || '',
+          html: el.innerHTML?.slice(0, 500) || '',
         }))
       );
 
-      // Log first result's raw text for debugging origin detection
-      if (results.length > 0) {
-        log.info({ route: `${query.origin}-${query.destination}`, sample: results[0].text.slice(0, 400), html: results[0].html.slice(0, 600) }, 'Arkia sample card');
-      }
 
       const offers: NormalizedOffer[] = [];
 
@@ -159,11 +155,18 @@ export class ArkiaScraperAdapter implements AirlineAdapter {
     const flightNumMatch = text.match(/\b(IZ|6H)\s*(\d{3,4})\b/i);
     const flightNumber = flightNumMatch ? `${flightNumMatch[1]}${flightNumMatch[2]}` : '';
 
+    // Extract actual departure/arrival airports from Hebrew text
+    // Pattern: "המראה ב TLV" (departure at TLV), "נחיתה ב ATH" (landing at ATH)
+    const depAirportMatch = text.match(/המראה ב\s*([A-Z]{3})/);
+    const arrAirportMatch = text.match(/נחיתה ב\s*([A-Z]{3})/);
+    const actualOrigin = depAirportMatch?.[1] || query.origin;
+    const actualDestination = arrAirportMatch?.[1] || query.destination;
+
     return {
-      id: `ARK-${query.origin}-${query.destination}-${departureDate}-${timeMatches[0] || ''}-${pricePerPerson}`,
+      id: `ARK-${actualOrigin}-${actualDestination}-${departureDate}-${timeMatches[0] || ''}-${pricePerPerson}`,
       airline: 'Arkia',
-      origin: query.origin,
-      destination: query.destination,
+      origin: actualOrigin,
+      destination: actualDestination,
       departureDate,
       departureTime: timeMatches[0] || '',
       arrivalTime: timeMatches[1] || '',
@@ -175,7 +178,7 @@ export class ArkiaScraperAdapter implements AirlineAdapter {
       pricePerChild: pricePerPerson, // Arkia shows per-person price already calculated
       seatsAvailable: null,
       passengerMix: query.passengers,
-      bookingUrl: `https://www.arkia.co.il/he/flights-results?CC=FL&IS_BACK_N_FORTH=false&OB_DEP_CITY=${query.origin}&OB_ARV_CITY=${query.destination}&OB_DATE=${query.departureDate.replace(/-/g, '')}&ADULTS=${query.passengers.adults}&CHILDREN=${query.passengers.children}&INFANTS=${query.passengers.infants}`,
+      bookingUrl: `https://www.arkia.co.il/he/flights-results?CC=FL&IS_BACK_N_FORTH=false&OB_DEP_CITY=${actualOrigin}&OB_ARV_CITY=${actualDestination}&OB_DATE=${query.departureDate.replace(/-/g, '')}&ADULTS=${query.passengers.adults}&CHILDREN=${query.passengers.children}&INFANTS=${query.passengers.infants}`,
       offerIdOrRef: null,
       rulesSummary: this.extractBaggage(text),
       fetchedAt: new Date(),
