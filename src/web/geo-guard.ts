@@ -8,19 +8,72 @@ const cache = new Map<string, { country: string; ts: number }>();
 const CACHE_TTL = 60 * 60 * 1000;
 
 /**
- * Blocked countries: Arab/Muslim-majority nations + countries without
- * diplomatic relations with Israel.
+ * Blocked countries: Arab League + Muslim-majority nations + countries
+ * without diplomatic relations with Israel. Strict blocklist.
  */
 const BLOCKED_COUNTRIES = new Set([
-  // Arab League
-  'DZ','BH','KM','DJ','EG','IQ','JO','KW','LB','LY',
-  'MR','MA','OM','PS','QA','SA','SO','SD','SY','TN','AE','YE',
+  // Arab League members
+  'DZ',  // Algeria
+  'BH',  // Bahrain
+  'KM',  // Comoros
+  'DJ',  // Djibouti
+  'EG',  // Egypt
+  'IQ',  // Iraq
+  'JO',  // Jordan
+  'KW',  // Kuwait
+  'LB',  // Lebanon
+  'LY',  // Libya
+  'MR',  // Mauritania
+  'MA',  // Morocco
+  'OM',  // Oman
+  'PS',  // Palestine
+  'QA',  // Qatar
+  'SA',  // Saudi Arabia
+  'SO',  // Somalia
+  'SD',  // Sudan
+  'SS',  // South Sudan
+  'SY',  // Syria
+  'TN',  // Tunisia
+  'AE',  // UAE
+  'YE',  // Yemen
   // Muslim-majority (non-Arab)
-  'AF','AL','AZ','BD','BN','BF','TD','GM','GN','ID',
-  'IR','KZ','XK','KG','MY','MV','ML','NE','PK','SN',
-  'SL','TJ','TR','TM','UZ',
+  'AF',  // Afghanistan
+  'AL',  // Albania
+  'AZ',  // Azerbaijan
+  'BD',  // Bangladesh
+  'BN',  // Brunei
+  'BF',  // Burkina Faso
+  'TD',  // Chad
+  'GN',  // Guinea
+  'GM',  // Gambia
+  'GW',  // Guinea-Bissau
+  'ID',  // Indonesia
+  'IR',  // Iran
+  'KZ',  // Kazakhstan
+  'XK',  // Kosovo
+  'KG',  // Kyrgyzstan
+  'MY',  // Malaysia
+  'MV',  // Maldives
+  'ML',  // Mali
+  'NE',  // Niger
+  'NG',  // Nigeria
+  'PK',  // Pakistan
+  'SN',  // Senegal
+  'SL',  // Sierra Leone
+  'TJ',  // Tajikistan
+  'TR',  // Turkey
+  'TM',  // Turkmenistan
+  'UZ',  // Uzbekistan
+  'ER',  // Eritrea
+  'TG',  // Togo
+  'CI',  // Ivory Coast
   // No diplomatic relations with Israel
-  'KP','CU','VE','BO','BT',
+  'KP',  // North Korea
+  'CU',  // Cuba
+  'VE',  // Venezuela
+  'BO',  // Bolivia
+  'BT',  // Bhutan
+  'NI',  // Nicaragua
 ]);
 
 /** Bypass list for local dev, health checks, etc. */
