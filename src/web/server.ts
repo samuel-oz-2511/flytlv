@@ -247,6 +247,7 @@ button{font-family:inherit;cursor:pointer}
 .chip.arkia{background:#f0f9ff;color:#0369a1}
 .chip.israir{background:#f5f3ff;color:#7c3aed}
 .chip.airhaifa{background:#ecfdf5;color:#059669}
+.chip.alt-airport{background:#fef3c7;color:#92400e;font-weight:800;letter-spacing:.3px}
 .chip.available{background:var(--green-tag);color:var(--green-dark)}
 .chip.gone{background:var(--bg2);color:var(--text3)}
 .chip.priority{background:var(--orange-tag);color:#92400e}
@@ -622,7 +623,7 @@ const CITIES = {
   BCN:'Barcelona',LIS:'Lisbon',ZRH:'Zurich',AMS:'Amsterdam',CDG:'Paris',
   LHR:'London',MUC:'Munich',FRA:'Frankfurt',EMA:'East Midlands',
   MAD:'Madrid',GVA:'Geneva',LYS:'Lyon',VCE:'Venice',TIA:'Tirana',
-  TLV:'Tel Aviv',SZG:'Salzburg',TBS:'Tbilisi',KRK:'Krakow',LTN:'London Luton'
+  TLV:'Tel Aviv',AQJ:'Aqaba',TCP:'Taba',SZG:'Salzburg',TBS:'Tbilisi',KRK:'Krakow',LTN:'London Luton'
 };
 function city(c){ return CITIES[c]||c }
 function acl(n){ const l=n.toLowerCase(); if(l.includes('el al'))return'elal'; if(l.includes('arkia'))return'arkia'; if(l.includes('israir'))return'israir'; return'airhaifa' }
@@ -664,6 +665,7 @@ function renderCard(o){
   h+='<div class="card-top">';
   h+='<span class="chip '+ac+'">'+o.airline+'</span>';
   h+='<span class="chip date-chip">'+fmtDate(o.departure_date).split(' \u2014 ')[0]+'</span>';
+  if(o.origin!=='TLV') h+='<span class="chip alt-airport">From '+city(o.origin)+'</span>';
   if(pri) h+='<span class="chip priority">\\u2605 Priority</span>';
   h+='<span class="card-top-right"><span class="chip '+(gone?'gone':'available')+'">'+(gone?'Sold Out':'Available')+'</span></span>';
   h+='</div>';
