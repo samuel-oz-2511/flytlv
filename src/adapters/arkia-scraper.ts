@@ -105,10 +105,13 @@ export class ArkiaScraperAdapter implements AirlineAdapter {
         return true;
       });
 
+      // Log actual origins found (helps verify AQJ/TCP detection)
+      const originsFound = [...new Set(unique.map(o => o.origin))];
       log.info({
         route: `${query.origin}-${query.destination}`,
         rawResults: results.length,
         offers: unique.length,
+        origins: originsFound,
       }, 'Arkia route scraped');
 
       return unique;
