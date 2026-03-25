@@ -7,7 +7,21 @@ const log = childLogger('geo-guard');
 const cache = new Map<string, { country: string; ts: number }>();
 const CACHE_TTL = 60 * 60 * 1000;
 
-const ALLOWED_COUNTRIES = new Set(['IL']);
+/**
+ * Blocked countries: Arab/Muslim-majority nations + countries without
+ * diplomatic relations with Israel.
+ */
+const BLOCKED_COUNTRIES = new Set([
+  // Arab League
+  'DZ','BH','KM','DJ','EG','IQ','JO','KW','LB','LY',
+  'MR','MA','OM','PS','QA','SA','SO','SD','SY','TN','AE','YE',
+  // Muslim-majority (non-Arab)
+  'AF','AL','AZ','BD','BN','BF','TD','GM','GN','ID',
+  'IR','KZ','XK','KG','MY','MV','ML','NE','PK','SN',
+  'SL','TJ','TR','TM','UZ',
+  // No diplomatic relations with Israel
+  'KP','CU','VE','BO','BT',
+]);
 
 /** Bypass list for local dev, health checks, etc. */
 function isLocalIP(ip: string): boolean {
@@ -43,8 +57,9 @@ async function lookupCountry(ip: string): Promise<string> {
 }
 
 /**
- * Express middleware that restricts access to Israeli IPs.
- * Applied to all routes. API and page requests from non-IL IPs get a 403.
+ * Express middleware that blocks access from restricted regions.
+ * Allows most of the world; blocks Arab/Muslim-majority countries
+ * and nations without diplomatic relations with Israel.
  */
 export function geoGuard() {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -57,15 +72,15 @@ export function geoGuard() {
 
     const country = await lookupCountry(ip);
 
-    if (ALLOWED_COUNTRIES.has(country)) {
+    if (!BLOCKED_COUNTRIES.has(country)) {
       next();
       return;
     }
 
-    log.warn({ ip, country, path: req.path }, 'Blocked non-IL access');
+    log.warn({ ip, country, path: req.path }, 'Blocked access');
 
     if (req.path.startsWith('/api/')) {
-      res.status(403).json({ error: 'This service is only available in Israel.' });
+      res.status(403).json({ error: 'This service is not available in your region.' });
     } else {
       res.status(403).send(`
         <!DOCTYPE html>
@@ -73,7 +88,7 @@ export function geoGuard() {
         <style>body{font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f6f8;color:#0f172a;text-align:center}
         .box{max-width:400px;padding:48px 32px;background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
         h1{font-size:24px;margin-bottom:8px}p{color:#475569;font-size:15px;line-height:1.6}</style></head>
-        <body><div class="box"><h1>FlyTLV</h1><p>This service is currently available only to users in Israel.</p></div></body></html>
+        <body><div class="box"><h1>FlyTLV</h1><p>This service is not available in your region.</p></div></body></html>
       `);
     }
   };
