@@ -10,7 +10,7 @@ import { childLogger } from '../utils/logger.js';
 const log = childLogger('poll-executor');
 
 /** Max concurrent route scrapes per adapter */
-const ROUTE_CONCURRENCY = 3;
+const ROUTE_CONCURRENCY = 2;
 
 /**
  * Runs the full pipeline for a given adapter:
