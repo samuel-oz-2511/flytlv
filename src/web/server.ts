@@ -108,9 +108,9 @@ function dashboardHtml(): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FlyTLV - Rescue Flights from Ben Gurion</title>
-<meta property="og:title" content="FlyTLV - Rescue Flights from Ben Gurion">
-<meta property="og:description" content="Free real-time scanner for rescue flights out of TLV. Scans El Al, Arkia, Israir &amp; Air Haifa every few minutes. No signup needed.">
+<title>FlyTLV - Rescue Flights by Israeli Airlines from TLV / Aqaba / Taba</title>
+<meta property="og:title" content="FlyTLV - Rescue Flights by Israeli Airlines from TLV / Aqaba / Taba">
+<meta property="og:description" content="Free real-time scanner for rescue flights by Israeli airlines from TLV, Aqaba &amp; Taba. Scans El Al, Arkia, Israir &amp; Air Haifa every few minutes. No signup needed.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://claim.travel">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -465,8 +465,8 @@ button{font-family:inherit;cursor:pointer}
     <div class="landing-icon">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0011.5 2 1.5 1.5 0 0010 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
     </div>
-    <h1>Find Rescue Flights<br>Out of <span>Ben Gurion</span></h1>
-    <p class="landing-sub">Built by a parent who couldn't find a flight for his family. FlyTLV scans all available flights departing TLV in the <strong>next 7 days</strong> across El Al, Arkia, Israir, and Air Haifa. Airlines release seats unpredictably throughout the day &mdash; this tool catches them the moment they appear.</p>
+    <h1>Find Rescue Flights<br>by <span>Israeli Airlines</span></h1>
+    <p class="landing-sub">Built by a parent who couldn't find a flight for his family. FlyTLV scans all available flights by Israeli airlines from TLV, Aqaba &amp; Taba in the <strong>next 7 days</strong> across El Al, Arkia, Israir, and Air Haifa. Airlines release seats unpredictably throughout the day &mdash; this tool catches them the moment they appear.</p>
     <div class="landing-actions">
       <button class="btn btn-primary btn-lg" onclick="enterDashboard()">Show Me the Flights</button>
     </div>
@@ -477,7 +477,7 @@ button{font-family:inherit;cursor:pointer}
     <div class="feat-card">
       <div class="feat-card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
       <h3>7-Day Rolling Window</h3>
-      <p>We scan flights departing in the next 7 days only. This is a rescue tool &mdash; built for urgency, not long-term planning. Availability updates every 2-5 minutes.</p>
+      <p>We scan flights by Israeli airlines departing from TLV, Aqaba &amp; Taba in the next 7 days only. This is a rescue tool &mdash; built for urgency, not long-term planning. Availability updates every 2-5 minutes.</p>
     </div>
     <div class="feat-card">
       <div class="feat-card-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
@@ -494,11 +494,11 @@ button{font-family:inherit;cursor:pointer}
   <div class="about">
     <div class="about-box">
       <h2>About FlyTLV</h2>
-      <p>FlyTLV is a free rescue-flight scanner for people trying to leave Israel through Ben Gurion Airport. When flights are scarce and seats sell out in minutes, manually refreshing airline websites is not enough. FlyTLV does the work for you &mdash; scanning 4 Israeli carriers every 2-5 minutes and showing you what's actually available <strong>in the next 7 days</strong>.</p>
+      <p>FlyTLV is a free rescue-flight scanner for people trying to leave Israel. Israeli airlines now operate from TLV, Aqaba (Jordan) and Taba (Egypt) due to limited capacity at Ben Gurion. When flights are scarce and seats sell out in minutes, manually refreshing airline websites is not enough. FlyTLV does the work for you &mdash; scanning 4 Israeli carriers every 2-5 minutes and showing you what's actually available <strong>in the next 7 days</strong>.</p>
       <p>This is <strong>not</strong> a vacation planner or a flight comparison site. It is built for one purpose: helping families and individuals find an available seat out of TLV as fast as possible.</p>
       <p><strong>What to expect:</strong></p>
       <ul>
-        <li>A live dashboard of every available flight from TLV in the next 7 days, across El Al, Arkia, Israir, and Air Haifa</li>
+        <li>A live dashboard of every available flight by Israeli airlines from TLV, Aqaba &amp; Taba in the next 7 days</li>
         <li>Real seat counts &mdash; know exactly how many seats remain before you click through to book</li>
         <li>Prices calculated for your specific party size (adults, children, infants)</li>
         <li>Automatic filtering &mdash; flights without enough seats for your group are hidden</li>
@@ -517,7 +517,7 @@ button{font-family:inherit;cursor:pointer}
       <p>When things escalated, the nursery mostly shut down. Even the partial reopening didn't work for us &mdash; we couldn't justify the drive under the circumstances. So our son stayed home. Day after day, with no routine, no friends around, no familiar faces beyond us.</p>
       <p>At first he asked about his teachers and friends constantly. Then less. Then he started forgetting their names. Every day the war continues, he loses a little more of the life he had before. That's when we decided we need to get out &mdash; even temporarily &mdash; and find him a normal environment abroad.</p>
       <p>But finding flights was impossible. Airlines release rescue seats unpredictably throughout the day. By the time you spot availability, it's gone. I'd spend hours refreshing airline websites, missing seats by minutes.</p>
-      <p>So I built FlyTLV. It scans every Israeli carrier around the clock and shows you the moment a seat opens up. I built it for my family &mdash; and I'm sharing it because I know we're not the only ones going through this.</p>
+      <p>So I built FlyTLV. It scans every Israeli carrier around the clock &mdash; flights from TLV, Aqaba and Taba &mdash; and shows you the moment a seat opens up. I built it for my family &mdash; and I'm sharing it because I know we're not the only ones going through this.</p>
     </div>
   </div>
 </div>
@@ -526,7 +526,7 @@ button{font-family:inherit;cursor:pointer}
 <div class="hero" style="display:none">
   <div class="hero-inner">
     <div class="hero-left">
-      <h1>Rescue Flights from Ben Gurion</h1>
+      <h1>Rescue Flights by Israeli Airlines</h1>
       <p>Next 7 days. Live seat availability across Israeli carriers, scanned every 2-5 minutes.</p>
     </div>
     <div class="stats-row">
@@ -961,6 +961,6 @@ function maintenanceHtml(): string {
     + '<div class="pill"><span></span>Maintenance</div>'
     + '<h1>We\'ll be back shortly</h1>'
     + '<p>FlyTLV is temporarily offline for maintenance. Our flight scanners are still running in the background and we\'ll be back up soon.</p>'
-    + '<p style="color:#64748b;font-size:12px">Rescue flight scanner for Ben Gurion Airport</p>'
+    + '<p style="color:#64748b;font-size:12px">Rescue flight scanner for Israeli airlines from TLV, Aqaba &amp; Taba</p>'
     + '</div></body></html>';
 }
