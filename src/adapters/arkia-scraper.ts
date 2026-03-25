@@ -71,9 +71,14 @@ export class ArkiaScraperAdapter implements AirlineAdapter {
       const results = await page.$$eval('.search-result', (els) =>
         els.map((el) => ({
           text: el.textContent?.trim() || '',
-          html: el.innerHTML?.slice(0, 500) || '',
+          html: el.innerHTML?.slice(0, 1000) || '',
         }))
       );
+
+      // Log first result's raw text for debugging origin detection
+      if (results.length > 0) {
+        log.debug({ route: `${query.origin}-${query.destination}`, sample: results[0].text.slice(0, 300), html: results[0].html.slice(0, 500) }, 'Arkia sample card');
+      }
 
       const offers: NormalizedOffer[] = [];
 
