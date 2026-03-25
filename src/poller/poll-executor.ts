@@ -9,8 +9,13 @@ import { childLogger } from '../utils/logger.js';
 
 const log = childLogger('poll-executor');
 
-/** Max concurrent route scrapes per adapter */
-const ROUTE_CONCURRENCY = 2;
+/**
+ * Max concurrent route scrapes per adapter.
+ * Keep at 1 — browser scrapers share a SOCKS5 tunnel with limited
+ * connection capacity, and route caching means each origin-dest pair
+ * only needs one page load regardless of how many dates are queried.
+ */
+const ROUTE_CONCURRENCY = 1;
 
 /**
  * Runs the full pipeline for a given adapter:
